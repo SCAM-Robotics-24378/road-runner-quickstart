@@ -35,6 +35,8 @@ public class Blue_Far extends LinearOpMode {
     private DcMotorEx flywheel;
     private CRServo Gecko1;
     private CRServo Gecko2;
+    private DcMotor spin1;
+    private DcMotor spin2;
 
 
     @Override
@@ -64,6 +66,11 @@ public class Blue_Far extends LinearOpMode {
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, customCoeffs);
         Gecko1 = hardwareMap.get(CRServo.class, "Gecko1");
         Gecko2 = hardwareMap.get(CRServo.class, "Gecko2");
+        spin1 = hardwareMap.get(DcMotor.class, "leftIntake");
+        spin2 = hardwareMap.get(DcMotor.class, "rightIntake");
+
+        spin1.setDirection(DcMotor.Direction.FORWARD);
+        spin2.setDirection(DcMotor.Direction.REVERSE);
 
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
@@ -89,7 +96,7 @@ public class Blue_Far extends LinearOpMode {
             LLResult result = limelight.getLatestResult(); // get the latest result from the limelight
             if (result != null) {
                 if (result.isValid()) {
-                    headingError = result.getTx() + 3.4;
+                    headingError = result.getTx();
                     rangeError = result.getBotposeAvgDist();
                     Pose3D botpose = result.getBotpose();
                     telemetry.addData("tx", result.getTx());
@@ -126,6 +133,14 @@ public class Blue_Far extends LinearOpMode {
         });
         Action stopFlywheel = new InstantAction( () -> {
             flywheel.setVelocity(0);
+        });
+        Action startIntake = new InstantAction( () -> {
+            spin1.setPower(-1);
+            spin2.setPower(-1);
+        });
+        Action stopIntake = new InstantAction( ()-> {
+            spin1.setPower(1);
+            spin2.setPower(1);
         });
         //TODO addjust times and locations as needed
         Action moveToFarLaunch = drive.actionBuilder(blue_far_init)

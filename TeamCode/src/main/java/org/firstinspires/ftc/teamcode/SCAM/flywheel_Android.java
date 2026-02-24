@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.SCAM;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -32,6 +33,9 @@ public class flywheel_Android extends LinearOpMode {
     private CRServo Gecko1;
     private CRServo Gecko2;
     private Limelight3A limelight;
+    private DcMotor spin1;
+    private DcMotor spin2;
+
 
 
     @Override
@@ -70,6 +74,9 @@ public class flywheel_Android extends LinearOpMode {
         BackLeft = hardwareMap.get(DcMotor.class, "backLeft");
         Gecko1 = hardwareMap.get(CRServo.class, "Gecko1");
         Gecko2 = hardwareMap.get(CRServo.class, "Gecko2");
+        spin1 = hardwareMap.get(DcMotorEx.class,"leftIntake");
+        spin2 = hardwareMap.get(DcMotorEx.class, "rightIntake");
+
 
 
         FrontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -77,11 +84,15 @@ public class flywheel_Android extends LinearOpMode {
         BackLeft.setDirection(DcMotor.Direction.FORWARD);
         FrontLeft.setDirection(DcMotor.Direction.FORWARD);
         Flywheel.setDirection(DcMotor.Direction.REVERSE);
+        spin1.setDirection(DcMotor.Direction.FORWARD);
+        spin2.setDirection(DcMotor.Direction.REVERSE);
 
         FrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        spin1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        spin2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
