@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.SCAM;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -18,6 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -25,12 +29,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Autonomous(name = "Blue_Far", group = "SCAM")
 
 public class Blue_Far extends LinearOpMode {
     // Create an instance of the sensor
-    GoBildaPinpointDriver pinpoint;
+    //GoBildaPinpointDriver pinpoint;
     private Limelight3A limelight;
     private DcMotorEx flywheel;
     private CRServo Gecko1;
@@ -41,16 +46,29 @@ public class Blue_Far extends LinearOpMode {
     public void runOpMode() throws InterruptedException
     {
         final Pose2d init_close = new Pose2d(-64, -40, Math.toRadians(-90));
-        final Pose2d blue_far_init= new Pose2d(64, -16, Math.toRadians(180));
-        final Pose2d blue_far_launch = new Pose2d(52,-15, Math.toRadians(-159));
+        final Pose2d blue_far_init= new Pose2d(62.75, -16, Math.toRadians(180));
+        final Pose2d blue_far_launch = new Pose2d(52,-15, Math.toRadians(-157));
         final Pose2d blue_far_park = new Pose2d(48,-25, Math.toRadians(180));
+        final Pose2d blue_spike1_start = new Pose2d(36, -23, Math.toRadians(90));
+        final Pose2d blue_spike1_end = new Pose2d(36, -62, Math.toRadians(90));
+
         final double flywheelVel_far= 1600;
         //final Pose2d init_test = new Pose2d(24, 0, Math.toRadians(0));
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         // Get a reference to the sensor
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        //pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
-        pinpoint.resetPosAndIMU();
+        //pinpoint.resetPosAndIMU();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        if (dashboard != null)
+        {
+            Telemetry tel = dashboard.getTelemetry();
+            if (tel != null)
+            {
+                // Combine driver station telemetry with FTC Dashboard telemetry and assign to opMode
+                telemetry =  new MultipleTelemetry(telemetry, tel); //Critically important that we set the opMode telemetry to the new telemetry
+            }
+        }
 
         telemetry.setMsTransmissionInterval(11);
 
@@ -64,6 +82,12 @@ public class Blue_Far extends LinearOpMode {
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, customCoeffs);
         Gecko1 = hardwareMap.get(CRServo.class, "Gecko1");
         Gecko2 = hardwareMap.get(CRServo.class, "Gecko2");
+        DcMotor spin1;
+        DcMotor spin2;
+        spin1 = hardwareMap.get(DcMotorEx.class, "leftIntake");
+        spin2 = hardwareMap.get(DcMotor.class, "rightIntake");
+        spin1.setDirection(DcMotor.Direction.FORWARD);
+        spin2.setDirection(DcMotor.Direction.REVERSE);
 
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
@@ -79,12 +103,12 @@ public class Blue_Far extends LinearOpMode {
         double rangeError = 0;
         double rx;
         while (!isStarted()) {
-            pinpoint.update();
-            Pose2D pinpointPose = pinpoint.getPosition();
+            //pinpoint.update();
+            //Pose2D pinpointPose = pinpoint.getPosition();
 
-            telemetry.addData("Pinpoint X (IN)", pinpointPose.getX(DistanceUnit.INCH));
-            telemetry.addData("Pinpoint Y (IN)", pinpointPose.getY(DistanceUnit.INCH));
-            telemetry.addData("Pinpoint Heading (DEG)", pinpointPose.getHeading(AngleUnit.DEGREES));
+//            telemetry.addData("Pinpoint X (IN)", pinpointPose.getX(DistanceUnit.INCH));
+//            telemetry.addData("Pinpoint Y (IN)", pinpointPose.getY(DistanceUnit.INCH));
+//            telemetry.addData("Pinpoint Heading (DEG)", pinpointPose.getHeading(AngleUnit.DEGREES));
 
             LLResult result = limelight.getLatestResult(); // get the latest result from the limelight
             if (result != null) {
@@ -152,41 +176,74 @@ public class Blue_Far extends LinearOpMode {
             Gecko2.setPower(0);
         });
         //TODO this sequence is a collection of others. You can use the individual actions elsewhere if needed
-        Action shootSequence = new SequentialAction(
-                startGeckoWheels,
-                waitForLaunch,
-                stopGeckoWheels,
-                waitForLaunchRecovery
-        );
-        pinpoint.update();
-        Pose2D pinpointPose = pinpoint.getPosition();
 
-        telemetry.addData("Pinpoint X (IN)", pinpointPose.getX(DistanceUnit.INCH));
-        telemetry.addData("Pinpoint Y (IN)", pinpointPose.getY(DistanceUnit.INCH));
-        telemetry.addData("Pinpoint Heading (DEG)", pinpointPose.getHeading(AngleUnit.DEGREES));
+        Supplier<Action> createNewShootSequence = () -> new SequentialAction(
+                new InstantAction( () -> {
+                    Gecko1.setPower(1);
+                    Gecko2.setPower(-1);
+                }),
+                drive.actionBuilder(blue_far_launch)
+                        .waitSeconds(1)
+                        .build(),
+                new InstantAction( () -> {
+                    Gecko1.setPower(0);
+                    Gecko2.setPower(0);
+                }),
+                drive.actionBuilder(blue_far_launch)
+                        .waitSeconds(1)
+                        .build()
+        );;
+
+
         Actions.runBlocking(
                 new ParallelAction(
                         //add inline action here for telemetry
                         new InstantAction( () -> {
-                            pinpoint.update();
-                            Pose2D pose = pinpoint.getPosition();
-
-                            telemetry.addData("Pinpoint X (IN)", pose.getX(DistanceUnit.INCH));
-                            telemetry.addData("Pinpoint Y (IN)", pose.getY(DistanceUnit.INCH));
-                            telemetry.addData("Pinpoint Heading (DEG)", pose.getHeading(AngleUnit.DEGREES));
+//                            pinpoint.update();
+//                            Pose2D pose = pinpoint.getPosition();
+//
+//                            telemetry.addData("Pinpoint X (IN)", pose.getX(DistanceUnit.INCH));
+//                            telemetry.addData("Pinpoint Y (IN)", pose.getY(DistanceUnit.INCH));
+//                            telemetry.addData("Pinpoint Heading (DEG)", pose.getHeading(AngleUnit.DEGREES));
                             telemetry.update();
                         }),
                         new SequentialAction(
+//                                drive.actionBuilder(blue_far_init)
+//                                       .strafeToLinearHeading( blue_spike1_start.position, blue_spike1_start.heading)
+//                                       .strafeToLinearHeading( blue_spike1_end.position, blue_spike1_end.heading)
+//                                       .build(),
+
+
                                 setFlywheelFar,
                                 // driveToFirstLaunch,
                                 moveToFarLaunch,
                                 waitForFlywheelSpinup,
                                 //First shot
-                                shootSequence,
+                                createNewShootSequence.get(),
                                 //Second shot
-                                shootSequence,
+                                createNewShootSequence.get(),
+                                //run intake
+                                new InstantAction( () -> {
+                                    spin1.setPower(-1);
+                                    spin2.setPower(-1);
+                                }),
                                 //Third shot
-                                shootSequence,
+                                createNewShootSequence.get(),
+//                                drive.actionBuilder(blue_far_launch)
+//                                        .strafeToLinearHeading(blue_spike1_start.position, blue_spike1_start.heading.toDouble())
+//                                        //.strafeToLinearHeading(blue_spike1_end.position, blue_spike1_end.heading.toDouble())
+//                                        //.strafeToLinearHeading(blue_far_launch.position, blue_far_launch.heading.toDouble())
+//                                        .build(),
+
+                                drive.actionBuilder(blue_far_launch)
+                                        .strafeToLinearHeading( blue_spike1_start.position, blue_spike1_start.heading)
+                                        .strafeToLinearHeading( blue_spike1_end.position, blue_spike1_end.heading)
+                                        .build(),
+
+                                drive.actionBuilder(blue_spike1_end)
+                                        .strafeToLinearHeading(blue_far_launch.position, blue_far_launch.heading.toDouble())
+                                        .build(),
+                                createNewShootSequence.get(),
                                 //park
                                 stopFlywheel,
                                 driveToBlueFarPark
