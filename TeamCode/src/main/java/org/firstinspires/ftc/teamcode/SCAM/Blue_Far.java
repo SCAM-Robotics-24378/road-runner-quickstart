@@ -46,6 +46,8 @@ public class Blue_Far extends LinearOpMode {
         final Pose2d blue_far_init= new Pose2d(64, -16, Math.toRadians(180));
         final Pose2d blue_far_launch = new Pose2d(52,-15, Math.toRadians(-159));
         final Pose2d blue_far_park = new Pose2d(48,-25, Math.toRadians(180));
+        final Pose2d blue_far_artifacts = new Pose2d(20, -65, 90);
+        final Pose2d blue_far_wall = new Pose2d(20, -72, 90);
         final double flywheelVel_far= 1600;
         //final Pose2d init_test = new Pose2d(24, 0, Math.toRadians(0));
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -84,6 +86,7 @@ public class Blue_Far extends LinearOpMode {
         //pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, init_test.position.x, init_test.position.y, AngleUnit.RADIANS, init_test.heading.toDouble()));
         double headingError = 0;
         double rangeError = 0;
+
         double rx;
         while (!isStarted()) {
             pinpoint.update();
@@ -142,12 +145,19 @@ public class Blue_Far extends LinearOpMode {
             spin1.setPower(1);
             spin2.setPower(1);
         });
+
         //TODO addjust times and locations as needed
         Action moveToFarLaunch = drive.actionBuilder(blue_far_init)
                 .strafeToLinearHeading(blue_far_launch.position, blue_far_launch.heading.toDouble())
                 .build();
         Action driveToBlueFarPark = drive.actionBuilder(blue_far_launch)
                 .strafeToLinearHeading(blue_far_park.position, blue_far_park.heading.toDouble())
+                .build();
+        Action drivetoArtifacts = drive.actionBuilder(blue_far_artifacts)
+                .strafeToLinearHeading(blue_far_artifacts.position, blue_far_artifacts.heading.toDouble())
+                .build();
+        Action drivetoWall = drive.actionBuilder(blue_far_wall)
+                .strafeToLinearHeading(blue_far_wall.position, blue_far_wall.heading.toDouble())
                 .build();
         Action waitForFlywheelSpinup = drive.actionBuilder(blue_far_init)
                 .waitSeconds(3)
@@ -192,8 +202,9 @@ public class Blue_Far extends LinearOpMode {
                             telemetry.update();
                         }),
                         new SequentialAction(
+
                                 setFlywheelFar,
-                                // driveToFirstLaunch,
+                               // driveToFirstLaunch
                                 moveToFarLaunch,
                                 waitForFlywheelSpinup,
                                 //First shot
@@ -204,7 +215,11 @@ public class Blue_Far extends LinearOpMode {
                                 shootSequence,
                                 //park
                                 stopFlywheel,
+                                startIntake,
                                 driveToBlueFarPark
+
+
+
                         )
                 )
 
