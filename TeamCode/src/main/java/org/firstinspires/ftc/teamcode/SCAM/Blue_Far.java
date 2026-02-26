@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -46,13 +47,13 @@ public class Blue_Far extends LinearOpMode {
     public void runOpMode() throws InterruptedException
     {
         final Pose2d init_close = new Pose2d(-64, -40, Math.toRadians(-90));
-        final Pose2d blue_far_init= new Pose2d(62.75, -16, Math.toRadians(180));
-        final Pose2d blue_far_launch = new Pose2d(52,-15, Math.toRadians(-157));
-        final Pose2d blue_far_park = new Pose2d(48,-25, Math.toRadians(180));
+        final Pose2d blue_far_init= new Pose2d(60, -16, Math.toRadians(180));
+        final Pose2d blue_far_launch = new Pose2d(52,-15, Math.toRadians(-155));
+        final Pose2d blue_far_park = new Pose2d(48,-27, Math.toRadians(180));
         final Pose2d blue_spike1_start = new Pose2d(36, -23, Math.toRadians(90));
         final Pose2d blue_spike1_end = new Pose2d(36, -62, Math.toRadians(90));
 
-        final double flywheelVel_far= 1600;
+        final double flywheelVel_far= 1620;
         //final Pose2d init_test = new Pose2d(24, 0, Math.toRadians(0));
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         // Get a reference to the sensor
@@ -186,7 +187,7 @@ public class Blue_Far extends LinearOpMode {
                         .waitSeconds(1)
                         .build(),
                 new InstantAction( () -> {
-                    Gecko1.setPower(0);
+                    Gecko1.setPower(-0.01);
                     Gecko2.setPower(0);
                 }),
                 drive.actionBuilder(blue_far_launch)
@@ -208,14 +209,7 @@ public class Blue_Far extends LinearOpMode {
                             telemetry.update();
                         }),
                         new SequentialAction(
-//                                drive.actionBuilder(blue_far_init)
-//                                       .strafeToLinearHeading( blue_spike1_start.position, blue_spike1_start.heading)
-//                                       .strafeToLinearHeading( blue_spike1_end.position, blue_spike1_end.heading)
-//                                       .build(),
-
-
                                 setFlywheelFar,
-                                // driveToFirstLaunch,
                                 moveToFarLaunch,
                                 waitForFlywheelSpinup,
                                 //First shot
@@ -229,20 +223,36 @@ public class Blue_Far extends LinearOpMode {
                                 }),
                                 //Third shot
                                 createNewShootSequence.get(),
-//                                drive.actionBuilder(blue_far_launch)
-//                                        .strafeToLinearHeading(blue_spike1_start.position, blue_spike1_start.heading.toDouble())
-//                                        //.strafeToLinearHeading(blue_spike1_end.position, blue_spike1_end.heading.toDouble())
-//                                        //.strafeToLinearHeading(blue_far_launch.position, blue_far_launch.heading.toDouble())
-//                                        .build(),
-
+                                //Pick up first spike
                                 drive.actionBuilder(blue_far_launch)
                                         .strafeToLinearHeading( blue_spike1_start.position, blue_spike1_start.heading)
-                                        .strafeToLinearHeading( blue_spike1_end.position, blue_spike1_end.heading)
                                         .build(),
+                                new ParallelAction(
+                                        drive.actionBuilder(blue_spike1_start)
+                                                .strafeToLinearHeading( blue_spike1_end.position, blue_spike1_end.heading)
+                                                .build(),
+                                        new SequentialAction(
+                                                new SleepAction(1.75),
+                                                new InstantAction( () -> {
+                                                    spin1.setPower(0);
+                                                    spin2.setPower(0);
+                                                })
+                                                )
+                                )
 
+,
+                                //Go back to launch
                                 drive.actionBuilder(blue_spike1_end)
-                                        .strafeToLinearHeading(blue_far_launch.position, blue_far_launch.heading.toDouble())
+                                        .strafeToLinearHeading(new Vector2d(blue_far_launch.position.x -4, blue_far_launch.position.y + 2), blue_far_launch.heading.toDouble()-Math.toRadians(3))
                                         .build(),
+                                //Launch
+                                createNewShootSequence.get(),
+                                createNewShootSequence.get(),
+                                //run intake
+                                new InstantAction( () -> {
+                                    spin1.setPower(-1);
+                                    spin2.setPower(-1);
+                                }),
                                 createNewShootSequence.get(),
                                 //park
                                 stopFlywheel,
