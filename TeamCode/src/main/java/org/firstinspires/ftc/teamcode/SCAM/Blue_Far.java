@@ -51,11 +51,12 @@ public class Blue_Far extends LinearOpMode {
         final Pose2d init_close = new Pose2d(-64, -40, Math.toRadians(-90));
         final Pose2d blue_far_init= new Pose2d(60, -16, Math.toRadians(180));
         final Pose2d blue_far_launch = new Pose2d(52,-15, Math.toRadians(-155));
-        final Pose2d blue_far_park = new Pose2d(48,-27, Math.toRadians(180));
+        final Pose2d blue_far_park = new Pose2d(48,-31, Math.toRadians(180));
         final Pose2d blue_spike1_start = new Pose2d(36, -23, Math.toRadians(90));
         final Pose2d blue_spike1_end = new Pose2d(36, -62, Math.toRadians(90));
 
         final double flywheelVel_far= 1620;
+        final double flywheelVel_final = 1610;
         //final Pose2d init_test = new Pose2d(24, 0, Math.toRadians(0));
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         // Get a reference to the sensor
@@ -151,6 +152,9 @@ public class Blue_Far extends LinearOpMode {
         waitForStart();
         Action setFlywheelFar = new InstantAction( () -> {
             flywheel.setVelocity(flywheelVel_far);
+        });
+        Action setFlywheelFinal = new InstantAction( () ->{
+           flywheel.setVelocity(flywheelVel_final);
         });
         Action stopFlywheel = new InstantAction( () -> {
             flywheel.setVelocity(0);
@@ -248,7 +252,7 @@ public class Blue_Far extends LinearOpMode {
 ,
                                 //Go back to launch
                                 drive.actionBuilder(blue_spike1_end)
-                                        .strafeToLinearHeading(new Vector2d(blue_far_launch.position.x -4, blue_far_launch.position.y + 2), blue_far_launch.heading.toDouble()-Math.toRadians(3))
+                                        .strafeToLinearHeading(new Vector2d(blue_far_launch.position.x -4, blue_far_launch.position.y + 2), blue_far_launch.heading.toDouble()-Math.toRadians(0))
                                         .build(),
                                 //Launch
                                 createNewShootSequence.get(),
