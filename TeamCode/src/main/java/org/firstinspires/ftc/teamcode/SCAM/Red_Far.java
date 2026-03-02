@@ -46,13 +46,13 @@ public class Red_Far extends LinearOpMode {
     {
         final Pose2d init_close = new Pose2d(-54, 40, Math.toRadians(90));
         final Pose2d red_far_init= new Pose2d(70, 16, Math.toRadians(-180));
-        final Pose2d red_far_launch = new Pose2d(62,15, Math.toRadians(155));
+        final Pose2d red_far_launch = new Pose2d(58,12, Math.toRadians(156));
         final Pose2d red_far_park = new Pose2d(58,31, Math.toRadians(-180));
-        final Pose2d red_spike1_start = new Pose2d(46, 23, Math.toRadians(-90));
-        final Pose2d red_spike1_end = new Pose2d(46, 62, Math.toRadians(-90));
+        final Pose2d red_spike1_start = new Pose2d(38, 18, Math.toRadians(-90));
+        final Pose2d red_spike1_end = new Pose2d(36, 52, Math.toRadians(-90));
 
-        final double flywheelVel_far= 1620;
-        final double flywheelVel_final = 1610;
+        final double flywheelVel_far= 1594.5;
+        final double flywheelVel_final = 1585;
         //final Pose2d init_test = new Pose2d(24, 0, Math.toRadians(0));
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         // Get a reference to the sensor
@@ -248,7 +248,7 @@ public class Red_Far extends LinearOpMode {
                                 ,
                                 //Go back to launch
                                 drive.actionBuilder(red_spike1_end)
-                                        .strafeToLinearHeading(new Vector2d(red_far_launch.position.x -4, red_far_launch.position.y + 2), red_far_launch.heading.toDouble()-Math.toRadians(0))
+                                        .strafeToLinearHeading(new Vector2d(red_far_launch.position.x - 0, red_far_launch.position.y - 4), red_far_launch.heading.toDouble()+Math.toRadians(3))
                                         .build(),
                                 //Launch
                                 createNewShootSequence.get(),
